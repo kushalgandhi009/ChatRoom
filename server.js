@@ -32,13 +32,7 @@ io.sockets.on('connection', function (socket) {
 	 socket.broadcast.emit('online_user', {
          msgr : name
       });
-	   /* users.push(name);
-	  for(var i=0; i<users.length; i++)
-	  {
-      socket.broadcast.emit('online_user', {
-         msgr : users[i]
-      });
-	  }*/
+	   
       // make a nickname paramater for this socket
       // and then set its value to the name recieved
       // from the register even above. and then run
