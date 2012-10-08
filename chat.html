@@ -1,0 +1,94 @@
+<html>
+   <head>
+   <style type="text/css">
+   ul#users{
+	   		list-style:none; 
+			background:#006; 
+			color:#FFF; 
+	   }
+   li.user{
+	   margin-bottom:1px;
+	   padding:3px;
+ 	   font-size:14px !important; 
+   }
+   </style>
+      <script src="http://chatapp09.jit.su/socket.io/socket.io.js"></script>
+      <script src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
+      <script>
+         var name = '';
+         var socket = io.connect('http://chatapp09.jit.su');
+         
+         // at document read (runs only ones).
+         $(document).ready(function(){
+            // on click of the button (jquery thing)
+            // the things inside this clause happen only when 
+            // the button is clicked.
+            $("button").click(function(){
+            
+               // just some simple logging
+               $("p#log").html('sent message: ' + $("input#msg").val());
+               
+               // send message on inputbox to server
+               socket.emit('chat', $("input#msg").val() );
+               
+               // the server will recieve the message, 
+               // then maybe do some processing, then it will 
+               // broadcast it again. however, it will not 
+               // send it to the original sender. the sender
+               // will be the browser that sends the msg. 
+               // other browsers listening to the server will
+               // recieve the emitted message. therefore we will
+               // need to manually print this msg for the sender.
+               $("p#data_recieved").append("<br />\r\n" + name + ': ' + $("input#msg").val());
+               
+               // then we empty the text on the input box.
+               $("input#msg").val('');
+            });
+            
+            // ask for the name of the user, ask again if no name.
+            while (name == '') {
+               name = prompt("What's your name?","");
+            }
+            
+            // send the name to the server, and the server's 
+            // register wait will recieve this.
+            socket.emit('register', name );
+			
+         });
+         
+         // listen for chat event and recieve data
+         socket.on('chat', function (data) {
+         
+            // print data (jquery thing)
+            $("p#data_recieved").append("<br />\r\n" + data.msgr + ': ' + data.msg);
+            
+            // we log this event for fun :D
+            $("p#log").html('Got Message: ' + data.msg);
+            
+         });
+
+         // listen for new user registration event and display his name in Online user list
+         socket.on('online_user', function (data) {
+			// print data (jquery thing)
+           $("ul#users").append("<li class='user'>"+ data.msgr +"</li>"); 
+         });
+      </script>
+   </head>
+   <body>
+      <div class="inputs" style="margin-left:50px;">
+      <input type="text" id="msg" size="50"></input> &nbsp; <button>Send</button>
+      <p id="log"></p>
+      </div>
+      <div class="chatroom" style="border:2px solid #000; width:500px; height:500px; overflow:scroll;float:left; margin-left:50px; padding:20px;">
+      	<h2>Chat Room</h2>
+      	<p id="data_recieved"></p>
+      </div>
+      <div class="User" style="border:2px solid #000; width:300px;height:500px; overflow:scroll; float:right; margin-right:50px;padding:20px;"> 
+	  	<h2>Online Users</h2> 	  
+        <p id="online_users">
+        <ul id="users">
+        </ul>
+        </p>
+	  </div>
+   </body>
+</html>
